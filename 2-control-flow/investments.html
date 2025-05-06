@@ -57,7 +57,21 @@
 
         console.log("---------------------")
         console.log("PART 1...")
+        // PART 1: Constant 8% return until $1M goal
+        let initialBalance = 150000;
+        let targetBalance = 1000000;
+        let currentBalance = initialBalance;
+        let years = 0;
+        let fixedReturnRate = 0.08;
 
+        while (currentBalance < targetBalance) {
+        currentBalance *= (1 + fixedReturnRate);
+        years++;
+        }
+
+        console.log("Initial Balance:", formatUSD(initialBalance));
+        console.log("Years to $1M:", years);
+        console.log("Final Balance:", formatUSD(currentBalance));
 
 
 
@@ -65,15 +79,61 @@
 
         console.log("---------------------")
         console.log("PART 2...")
+        // PART 2: Simulated random returns each year
+        let randomBalance = initialBalance;
+        let randomYears = 0;
+        let randomReturns = [];
 
+        let randomNormal = d3.randomNormal(0.08, 0.15);  // mean = 8%, std = 15%
 
+        while (randomBalance < targetBalance) {
+        let annualReturn = randomNormal(); // e.g. 0.06 = 6%
+        randomReturns.push((annualReturn * 100).toFixed(2) + "%");
+        randomBalance *= (1 + annualReturn);
+        randomYears++;
+        }
 
-
+        console.log("Initial Balance:", formatUSD(initialBalance));
+        console.log("Years to $1M with random returns:", randomYears);
+        console.log("Final Balance:", formatUSD(randomBalance));
+        console.log("Yearly Returns:", randomReturns);
 
 
         console.log("---------------------")
         console.log("PART 3...")
 
+        // PART 3: Interactive simulation
+        // Add HTML interface dynamically
+        document.body.innerHTML += `
+     <hr>
+    <h3>Run Your Own Simulation</h3>
+    <label>Initial Balance: <input id="initial" type="number" value="150000"></label><br>
+    <label>Target Balance: <input id="target" type="number" value="1000000"></label><br>
+    <label>Mean Return (e.g. 0.08): <input id="mean" type="number" value="0.08" step="0.01"></label><br>
+    <label>Standard Deviation (e.g. 0.15): <input id="stdev" type="number" value="0.15" step="0.01"></label><br>
+    <button id="simulate">Run Simulation</button>
+    <p><strong>Results:</strong></p>
+    <p id="sim-result">Waiting for input...</p>
+    `;
+
+    document.getElementById("simulate").addEventListener("click", function () {
+    let initial = parseFloat(document.getElementById("initial").value);
+    let target = parseFloat(document.getElementById("target").value);
+    let mean = parseFloat(document.getElementById("mean").value);
+    let stdev = parseFloat(document.getElementById("stdev").value);
+
+    let balance = initial;
+    let simYears = 0;
+    let rand = d3.randomNormal(mean, stdev);
+
+    while (balance < target) {
+        balance *= (1 + rand());
+        simYears++;
+    }
+
+    document.getElementById("sim-result").textContent = 
+        `It took ${simYears} years to reach ${formatUSD(balance)}.`;
+    });
 
 
 

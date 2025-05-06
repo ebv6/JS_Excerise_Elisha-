@@ -69,60 +69,85 @@
         <p>Website: <a id="display-link" href="#TODO">TODO</span></p>
     </div>
 
-
-
-
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script type="text/javascript">
 
-        // AVOID HARD-CODING THE CREDENTIALS
-        // USE SESSION STORAGE TO MINIMIZE THE NUMBER OF TIMES WE HAVE TO PROVIDE THE CREDENTIAL
-        // check session storage for the API Key:
-        var apiKey = sessionStorage.getItem("ALPHAVANTAGE_API_KEY")
-        if (!apiKey) {
-            // if it isn't there, ask the user to supply it:
-            apiKey = prompt("Please enter your AlphaVantage API key:")
-            // store it in the session for later (so it will persist after refreshing the page)
-            sessionStorage.setItem("ALPHAVANTAGE_API_KEY", apiKey)
-        }
+    // Check session storage for the API Key
+    var apiKey = sessionStorage.getItem("ALPHAVANTAGE_API_KEY");
+    if (!apiKey) {
+        apiKey = prompt("Please enter your AlphaVantage API key:");
+        sessionStorage.setItem("ALPHAVANTAGE_API_KEY", apiKey);
+    }
+
+    // Known fallback website URLs for companies
+    const knownWebsites = {
+        "NFLX": "https://www.netflix.com",
+        "AAPL": "https://www.apple.com",
+        "GOOGL": "https://abc.xyz",
+        "GOOG": "https://abc.xyz",
+        "AMZN": "https://www.amazon.com",
+        "MSFT": "https://www.microsoft.com",
+        "META": "https://about.facebook.com/",
+        "TSLA": "https://www.tesla.com"
+    };
+
+    // DOM element references
+    const inputSymbol = document.getElementById("input-symbol");
+    const displayName = document.getElementById("display-name");
+    const displayDescription = document.getElementById("display-description");
+    const displayLink = document.getElementById("display-link");
+    const lookupButton = document.getElementById("lookup");
+
+    // Function to look up company info
+    function lookupCompany() {
+        var symbol = inputSymbol.value.trim().toUpperCase();
+        console.log("SYMBOL:", symbol);
+
+        var requestUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`;
+
+        d3.json(requestUrl).then(function(data) {
+            console.log("RESPONSE:", data);
+
+            // Part 1: Log data
+            console.log("---------------------");
+            console.log("PART 1...");
+            console.log("Name:", data.Name);
+            console.log("Description:", data.Description);
+            console.log("Website:", data.Website);
+
+            // Part 2: Update page content
+            console.log("---------------------");
+            console.log("PART 2...");
+
+            displayName.textContent = data.Name || "Not available";
+            displayDescription.textContent = data.Description || "Not available";
+
+            const websiteUrl = data.Website || knownWebsites[symbol] || null;
+            if (websiteUrl) {
+                displayLink.href = websiteUrl;
+                displayLink.textContent = websiteUrl;
+            } else {
+                displayLink.href = "#";
+                displayLink.textContent = "Not available";
+            }
+
+        }).catch(function(error) {
+            console.error("ERROR:", error);
+            displayName.textContent = "Error fetching data";
+            displayDescription.textContent = "Error fetching data";
+            displayLink.href = "#";
+            displayLink.textContent = "Not available";
+        });
+    }
+
+    // Function invocations
+    lookupCompany(); // Load initially with default value
+    lookupButton.addEventListener("click", lookupCompany, false);
+</script>
 
 
+</script>
 
-        // FUNCTION DEFINITION
-        function lookupCompany() {
-            var symbol = inputSymbol.value
-            console.log("SYMBOL:", symbol)
-
-            var requestUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${symbol}&apikey=${apiKey}`
-            d3.json(requestUrl).then(function(data) {
-                console.log("RESPONSE:", data)
-
-                console.log("---------------------")
-                console.log("PART 1...")
-
-
-
-
-
-
-                console.log("---------------------")
-                console.log("PART 2...")
-
-
-
-
-
-            }).catch(function(error) {
-                console.error("ERROR:", error)
-            })
-        }
-
-        // FUNCTION INVOCATIONS
-        // invoke function when the page loads:
-        //lookupCompany()
-        // invoke function when button is clicked:
-        //lookupButton.addEventListener("click", lookupCompany, false)
-
-    </script>
-</body>
+    </body>
+    
 </html>
